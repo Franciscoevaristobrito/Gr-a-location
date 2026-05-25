@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Pizarrón AI Dispatch Brain — Plantilla</title>
+<style>
+  @page { size: A4 landscape; margin: 10mm; }
+
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;
+    padding: 8mm;
+    color: #1a1a1a;
+    background: #fff;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 2px solid #1a1a1a;
+    padding-bottom: 4mm;
+    margin-bottom: 5mm;
+  }
+
+  .title {
+    font-size: 16pt;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .subtitle {
+    font-size: 9pt;
+    color: #555;
+  }
+
+  .date-line {
+    font-size: 10pt;
+  }
+
+  .date-line .blank {
+    display: inline-block;
+    border-bottom: 1px solid #1a1a1a;
+    min-width: 35mm;
+    margin-left: 4mm;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr auto;
+    gap: 4mm;
+    height: calc(100vh - 60mm);
+  }
+
+  .zone {
+    border: 1.5px solid #1a1a1a;
+    border-radius: 4px;
+    padding: 4mm;
+    position: relative;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .zone-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: #1a1a1a;
+    color: #fff;
+    font-size: 8pt;
+    font-weight: 700;
+    padding: 1.5mm 3mm;
+    border-bottom-right-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+
+  .zone-title {
+    font-size: 11pt;
+    font-weight: 700;
+    margin-top: 5mm;
+    margin-bottom: 2mm;
+  }
+
+  .zone-hint {
+    font-size: 7.5pt;
+    color: #777;
+    font-style: italic;
+    margin-bottom: 3mm;
+  }
+
+  .zone-body {
+    font-size: 9pt;
+    line-height: 1.5;
+  }
+
+  .zone-body ul {
+    padding-left: 4mm;
+    margin: 0;
+  }
+
+  .zone-body li {
+    margin-bottom: 1.5mm;
+  }
+
+  .zone-body code {
+    font-family: 'Courier New', monospace;
+    font-size: 8.5pt;
+    background: #f3f3f3;
+    padding: 0.5mm 1.5mm;
+    border-radius: 2px;
+  }
+
+  .zone-5 {
+    grid-column: span 2;
+    min-height: 30mm;
+  }
+
+  .checkbox {
+    display: inline-block;
+    width: 3.5mm;
+    height: 3.5mm;
+    border: 1.2px solid #1a1a1a;
+    margin-right: 2mm;
+    vertical-align: -1px;
+    border-radius: 1px;
+  }
+
+  .line {
+    border-bottom: 0.5px dotted #aaa;
+    height: 6mm;
+  }
+
+  .footer {
+    margin-top: 4mm;
+    font-size: 7.5pt;
+    color: #777;
+    text-align: center;
+    font-style: italic;
+  }
+
+  @media print {
+    body { padding: 0; }
+    .footer { position: fixed; bottom: 4mm; left: 0; right: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="title">PIZARRÓN — AI Dispatch Brain</div>
+    <div class="subtitle">Plantilla diaria de trabajo</div>
+  </div>
+  <div class="date-line">
+    Fecha: <span class="blank">&nbsp;</span>
+    &nbsp;&nbsp;&nbsp; Día N°: <span class="blank" style="min-width:15mm">&nbsp;</span>
+  </div>
+</div>
+
+<div class="grid">
+
+  <!-- ZONA 1 -->
+  <div class="zone">
+    <span class="zone-label">ZONA 1</span>
+    <div class="zone-title">FLUJO ACTUAL DEL ESCENARIO</div>
+    <div class="zone-hint">Dibuja el flujo de Make como cajas + flechas. Actualízalo cada vez que agregues un módulo.</div>
+    <div class="zone-body">
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+    </div>
+  </div>
+
+  <!-- ZONA 2 -->
+  <div class="zone">
+    <span class="zone-label">ZONA 2</span>
+    <div class="zone-title">VARIABLES CLAVE (DICCIONARIO)</div>
+    <div class="zone-hint">Una sola fuente de verdad. Si dudas en cómo se llama algo, miras aquí.</div>
+    <div class="zone-body">
+      <ul>
+        <li><code>pickup_time_formateado</code> = Date</li>
+        <li><code>deadhead_minutos</code> = número</li>
+        <li><code>viaje_minutos</code> = número</li>
+        <li><code>buffer_operacional</code> = número</li>
+        <li><code>tiempo_total_operacional</code> = suma</li>
+        <li><code>hora_disponible_camion</code> = Date</li>
+        <li><code>eta_llegada_pickup</code> = Date</li>
+        <li><code>______________________</code></li>
+        <li><code>______________________</code></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ZONA 3 -->
+  <div class="zone">
+    <span class="zone-label">ZONA 3</span>
+    <div class="zone-title">HOY — MÁXIMO 3 TAREAS</div>
+    <div class="zone-hint">Si pones 10, no harás ninguna. Tres. No más.</div>
+    <div class="zone-body">
+      <p><span class="checkbox"></span> 1. ______________________________________</p>
+      <p style="margin-left:7mm">______________________________________</p>
+      <p><span class="checkbox"></span> 2. ______________________________________</p>
+      <p style="margin-left:7mm">______________________________________</p>
+      <p><span class="checkbox"></span> 3. ______________________________________</p>
+      <p style="margin-left:7mm">______________________________________</p>
+    </div>
+  </div>
+
+  <!-- ZONA 4 -->
+  <div class="zone">
+    <span class="zone-label">ZONA 4</span>
+    <div class="zone-title">DECISIONES PENDIENTES</div>
+    <div class="zone-hint">Preguntas que no resuelves solo. No las trabajes hoy — déjalas escritas.</div>
+    <div class="zone-body">
+      <p>? ___________________________________________</p>
+      <p>&nbsp;&nbsp;___________________________________________</p>
+      <p>? ___________________________________________</p>
+      <p>&nbsp;&nbsp;___________________________________________</p>
+      <p>? ___________________________________________</p>
+      <p>&nbsp;&nbsp;___________________________________________</p>
+    </div>
+  </div>
+
+  <!-- ZONA 5 -->
+  <div class="zone zone-5">
+    <span class="zone-label">ZONA 5</span>
+    <div class="zone-title">BUGS / NOTAS RÁPIDAS</div>
+    <div class="zone-hint">Anotas mientras trabajas, no las arreglas ahora. Mañana decides cuáles atacar.</div>
+    <div class="zone-body">
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Regla de oro: una tarea a la vez. Termina, prueba, sigue. — AI Dispatch Brain
+</div>
+
+</body>
+</html>
