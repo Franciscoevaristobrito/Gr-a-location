@@ -11,7 +11,8 @@
 | [`PROJECT_OVERVIEW.md`](./PROJECT_OVERVIEW.md) | Visión global del proyecto. El "mapa mental" completo. |
 | [`glosario.md`](./glosario.md) | Diccionario de variables y términos. Fuente única de verdad. |
 | [`webhook-vapi-schema.md`](./webhook-vapi-schema.md) | Contrato Vapi → Make. Qué campos recibe el sistema. |
-| [`vapi-variable-descriptions.md`](./vapi-variable-descriptions.md) | Descripciones paste-ready para configurar Vapi (cómo extrae cada variable). |
+| [`vapi-variable-descriptions.md`](./vapi-variable-descriptions.md) | Descripciones paste-ready para configurar Vapi (cómo extrae cada variable). 26 variables completas. |
+| [`vapi-variables-carga.md`](./vapi-variables-carga.md) | Subset enfocado: solo las 12 variables de carga (sin ciudad/hora/broker). |
 | [`rutina_diaria.md`](./rutina_diaria.md) | Cheat sheet de la rutina de trabajo. |
 | [`pizarron_template.html`](./pizarron_template.html) | Plantilla imprimible para el pizarrón. |
 
