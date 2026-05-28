@@ -1,14 +1,27 @@
 # Vapi — Variables de carga (solo lo esencial)
 
-Variables enfocadas únicamente en **describir la carga**. No incluye datos de ciudad, hora, broker ni operacionales de ruta.
+Variables enfocadas únicamente en **describir la carga**. Agrupadas por función operacional, no por "importancia genérica".
 
 Todas las descripciones están en inglés porque los brokers hablan inglés. Listas para copiar y pegar en Vapi.
 
 ---
 
-## 🟢 CRÍTICAS — preguntar siempre (6)
+## 🎯 Filosofía de agrupación
 
-Sin estas, no se puede asignar un vehículo correctamente.
+```
+ELEGIBILIDAD   → ¿podemos siquiera aceptar esta carga?
+PLANIFICACIÓN  → ¿cuánto tiempo/buffer necesita?
+CONDICIONAL    → solo si una pregunta anterior lo activa
+```
+
+Si falta una de **elegibilidad**, no podemos despachar — punto.
+Si falta una de **planificación**, despachamos pero con buffer conservador.
+
+---
+
+## 🟢 ELEGIBILIDAD — definen si la carga es viable (7)
+
+Estas decidente **qué vehículo o conductor califica**. Sin estas, no se puede asignar correctamente y se corre el riesgo de mandar un camión equivocado.
 
 ---
 
@@ -132,7 +145,98 @@ Save the number even if it exceeds the limit.
 
 ---
 
-### 5. tipo_recogida
+### 5. refrigerado
+
+**Name:** `refrigerado`
+**Type:** `boolean`
+
+**Description:**
+```
+Determine if cargo requires temperature control.
+This is an ELIGIBILITY question: only trucks with reefer equipment qualify.
+
+Examples:
+- "Cold load" → true
+- "Refrigerated" → true
+- "Frozen" → true
+- "Needs to stay at 38 degrees" → true
+- "Temperature controlled" → true
+- "Reefer load" → true
+- "Dry van OK" → false
+- "Ambient" → false
+- "Room temperature" → false
+
+Default to false if not mentioned.
+
+If true, the system will only match trucks equipped with refrigeration.
+```
+
+---
+
+### 6. hazmat
+
+**Name:** `hazmat`
+**Type:** `boolean`
+
+**Description:**
+```
+Determine if the cargo is hazardous material.
+This is an ELIGIBILITY question: only drivers with hazmat certification qualify.
+
+Examples:
+- "Hazmat load" → true
+- "Class 3 flammable" → true
+- "Corrosives" → true
+- "Lithium batteries" → true
+- "Just regular freight" → false
+- "Non-hazardous" → false
+- "Dry goods" → false
+
+Default to false if not mentioned.
+
+If true, the system will only match drivers with valid hazmat endorsement.
+```
+
+---
+
+### 7. servicios_especiales
+
+**Name:** `servicios_especiales`
+**Type:** `string`
+
+**Description:**
+```
+Extract any special services requested.
+Some services restrict which trucks or drivers can take the load.
+
+Valid values: "white_glove", "inside_delivery", "signature_required", "tarping"
+
+Examples:
+- "White glove service" → "white_glove"
+- "Needs to be brought inside" → "inside_delivery"
+- "Signature required at delivery" → "signature_required"
+- "White glove and inside delivery" → "white_glove,inside_delivery"
+- "Standard service" → ""
+- Not mentioned → ""
+
+Save as comma-separated string with no spaces between values.
+If none mentioned, save empty string "".
+
+Never invent service names. Only use the 4 valid values.
+
+Note: white_glove requires trained drivers; inside_delivery may require
+specific vehicle access. The system filters based on this.
+```
+
+---
+
+## 🟡 PLANIFICACIÓN — afinan el buffer y la ruta (3)
+
+Estas no descartan camiones, pero **ajustan el tiempo** que se le asigna a la operación. Si faltan, se usa el peor caso (más conservador).
+
+---
+
+### 8. tipo_recogida
 
 **Name:** `tipo_recogida`
 **Type:** `string`
@@ -159,7 +263,7 @@ Never save "drop_hook".
 
 ---
 
-### 6. metodo_carga
+### 9. metodo_carga
 
 **Name:** `metodo_carga`
 **Type:** `string`
@@ -180,16 +284,12 @@ Examples:
 - "Hand loaded" → "manual"
 - "No dock, no liftgate" → "manual"
 
-If not mentioned, default to "manual" (safest assumption).
+If not mentioned, default to "manual" (safest assumption — longest buffer).
 ```
 
 ---
 
-## 🟡 IMPORTANTES — preguntar si la conversación lo permite (2)
-
----
-
-### 7. requiere_liftgate
+### 10. requiere_liftgate
 
 **Name:** `requiere_liftgate`
 **Type:** `boolean`
@@ -215,62 +315,18 @@ Box Trucks usually have a liftgate. Cargo Vans usually do NOT.
 
 ---
 
-### 8. servicios_especiales
+## 🔵 CONDICIONALES — solo si una anterior las activa (2)
 
-**Name:** `servicios_especiales`
-**Type:** `string`
-
-**Description:**
-```
-Extract any special services requested.
-Valid values: "white_glove", "inside_delivery", "signature_required", "tarping"
-
-Examples:
-- "White glove service" → "white_glove"
-- "Needs to be brought inside" → "inside_delivery"
-- "Signature required at delivery" → "signature_required"
-- "White glove and inside delivery" → "white_glove,inside_delivery"
-- "Standard service" → ""
-- Not mentioned → ""
-
-Save as comma-separated string with no spaces between values.
-If none mentioned, save empty string "".
-
-Never invent service names. Only use the 4 valid values.
-```
+Estas variables **solo tienen sentido si otra ya marcó algo**. Vapi no debe preguntarlas si no aplican.
 
 ---
 
-## 🔵 OPCIONALES — solo si aplican (4)
-
----
-
-### 9. hazmat
-
-**Name:** `hazmat`
-**Type:** `boolean`
-
-**Description:**
-```
-Determine if the cargo is hazardous material.
-
-Examples:
-- "Hazmat load" → true
-- "Class 3 flammable" → true
-- "Corrosives" → true
-- "Just regular freight" → false
-- "Non-hazardous" → false
-- "Dry goods" → false
-
-Default to false if not mentioned.
-```
-
----
-
-### 10. hazmat_clase
+### 11. hazmat_clase
 
 **Name:** `hazmat_clase`
 **Type:** `string`
+
+**Trigger:** Only ask if `hazmat = true`.
 
 **Description:**
 ```
@@ -282,34 +338,11 @@ Examples:
 - "Class 8 corrosives" → "8"
 - "Class 9 misc" → "9"
 
-If hazmat = false, leave empty.
+If hazmat = false, leave empty. Do not ask.
 If hazmat = true but the class is not specified, ask:
-"What's the hazmat class?"
+"What's the hazmat class number, 1 through 9?"
 
 Save only the single digit as a string.
-```
-
----
-
-### 11. refrigerado
-
-**Name:** `refrigerado`
-**Type:** `boolean`
-
-**Description:**
-```
-Determine if cargo requires temperature control.
-
-Examples:
-- "Cold load" → true
-- "Refrigerated" → true
-- "Frozen" → true
-- "Needs to stay at 38 degrees" → true
-- "Temperature controlled" → true
-- "Dry van OK" → false
-- "Ambient" → false
-
-Default to false if not mentioned.
 ```
 
 ---
@@ -318,6 +351,8 @@ Default to false if not mentioned.
 
 **Name:** `temperatura_requerida_f`
 **Type:** `number`
+
+**Trigger:** Only ask if `refrigerado = true`.
 
 **Description:**
 ```
@@ -332,10 +367,9 @@ Examples:
 Conversion:
 - Celsius to Fahrenheit: (C × 9/5) + 32. Round to nearest integer.
 
+If refrigerado = false, leave empty. Do not ask.
 If refrigerado = true but no temperature is given, ask:
 "What's the target temperature in Fahrenheit?"
-
-If refrigerado = false, leave empty.
 ```
 
 ---
@@ -343,23 +377,23 @@ If refrigerado = false, leave empty.
 ## 📋 Resumen visual
 
 ```text
-CRÍTICAS (6)
-  ├─ tipo_camion        box_truck | van
-  ├─ tipo_carga         palletized | boxes | loose | fragile | refrigerated_small
-  ├─ cantidad_pallets   0-12
-  ├─ peso_total_libras  número
-  ├─ tipo_recogida      live_load | wait_load
-  └─ metodo_carga       forklift_dock | liftgate | manual | driver_assist
+ELEGIBILIDAD (7) — sin estas no se puede asignar vehículo
+  ├─ tipo_camion          box_truck | van
+  ├─ tipo_carga           palletized | boxes | loose | fragile | refrigerated_small
+  ├─ cantidad_pallets     0-12
+  ├─ peso_total_libras    número
+  ├─ refrigerado          true | false       ← filtra flota con reefer
+  ├─ hazmat               true | false       ← filtra conductores certificados
+  └─ servicios_especiales white_glove | inside_delivery | signature_required | tarping
 
-IMPORTANTES (2)
-  ├─ requiere_liftgate  true | false
-  └─ servicios_especiales  white_glove | inside_delivery | signature_required | tarping
+PLANIFICACIÓN (3) — ajustan el buffer
+  ├─ tipo_recogida        live_load | wait_load
+  ├─ metodo_carga         forklift_dock | liftgate | manual | driver_assist
+  └─ requiere_liftgate    true | false
 
-OPCIONALES (4) — solo si aplican
-  ├─ hazmat             true | false
-  ├─ hazmat_clase       1-9
-  ├─ refrigerado        true | false
-  └─ temperatura_requerida_f  número en °F
+CONDICIONALES (2) — solo si la anterior lo activa
+  ├─ hazmat_clase            1-9         (solo si hazmat = true)
+  └─ temperatura_requerida_f número °F   (solo si refrigerado = true)
 ```
 
 ---
@@ -370,3 +404,25 @@ OPCIONALES (4) — solo si aplican
 2. **Defaults conservadores.** Si no se menciona, asumir el peor caso (ej. `metodo_carga = "manual"`).
 3. **Conversiones automáticas.** Toneladas → libras, kg → libras, °C → °F.
 4. **Una variable = una respuesta.** Nunca rangos ("8 a 10"), nunca múltiples opciones, nunca "depende".
+5. **Condicionales NO se preguntan si el trigger es false.** No pregunte `hazmat_clase` si `hazmat = false`.
+
+---
+
+## 🔁 Orden recomendado de preguntas
+
+Vapi debe seguir este orden para minimizar preguntas innecesarias:
+
+```text
+1. tipo_camion              ¿Box Truck o Van?
+2. tipo_carga               ¿Qué tipo de carga?
+3. cantidad_pallets         (si tipo_carga ≠ "loose")
+4. peso_total_libras        ¿Peso aproximado?
+5. refrigerado              ¿Necesita refrigeración?
+6.   └─ temperatura_requerida_f  (solo si refrigerado = true)
+7. hazmat                   ¿Es hazmat?
+8.   └─ hazmat_clase             (solo si hazmat = true)
+9. servicios_especiales     ¿Algún servicio especial?
+10. tipo_recogida           ¿Live load o pre-cargado?
+11. metodo_carga            ¿Con dock, liftgate o manual?
+12. requiere_liftgate       (deducir de metodo_carga, no preguntar dos veces)
+```
