@@ -1,10 +1,19 @@
-# Airtable — Schema
+# Airtable — Schema y Automations
 
-Documentación del schema de cada tabla. Un archivo por tabla.
+Documentación del schema de cada tabla, fórmulas críticas y Automations. Un archivo por tabla o concepto.
 
 ## Para qué sirve
 
-Saber qué campos existen, qué tipo son, sus fórmulas y vistas, sin tener que abrir Airtable.
+Saber qué campos existen, qué tipo son, sus fórmulas, vistas y Automations, sin tener que abrir Airtable.
+
+## Archivos en esta carpeta
+
+| Archivo | Cubre |
+|---|---|
+| [`hos-automatico.md`](./hos-automatico.md) | Sistema de descuento automático de HOS (Formulas + Rollups) |
+| [`automation-conflictos-citas.md`](./automation-conflictos-citas.md) | Detector de conflictos de horario con Run a script |
+
+> Cuando agregues una tabla nueva, créale su propio archivo siguiendo la plantilla de abajo.
 
 ## Plantilla
 
