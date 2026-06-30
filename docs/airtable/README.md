@@ -12,6 +12,7 @@ Saber qué campos existen, qué tipo son, sus fórmulas, vistas y Automations, s
 |---|---|
 | [`hos-automatico.md`](./hos-automatico.md) | Sistema de descuento automático de HOS (Formulas + Rollups) |
 | [`automation-conflictos-citas.md`](./automation-conflictos-citas.md) | Detector de conflictos de horario con Run a script |
+| [`tabla-turnos.md`](./tabla-turnos.md) | Tabla Turnos para disponibilidad multi-día con días libres |
 
 > Cuando agregues una tabla nueva, créale su propio archivo siguiendo la plantilla de abajo.
 
