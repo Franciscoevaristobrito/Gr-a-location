@@ -106,6 +106,96 @@ La protección de citas futuras NO necesita lógica nueva: la Fase 2 ya validó
 que espera + regreso caben antes de la próxima cita (mismo patrón
 `respeta_proxima_cita` del escenario de cotización).
 
+### FASE 2b — Precio por mercado destino (headhaul/backhaul pricing) (PENDIENTE)
+
+La misma tabla `Ciudades_Estrategicas` alimenta el PRECIO: cobrar según qué
+tan probable es conseguir carga de regreso en el destino.
+
+```
+Entrega en ciudad CALIENTE (Houston): casi seguro hay backhaul
+   → el regreso "se paga solo" → cotizar MÁS BARATO → ganar la carga
+Entrega en ciudad FRÍA / pueblo: regreso vacío casi seguro
+   → el precio debe cubrir parte del regreso → cotizar MÁS ALTO
+```
+
+**Campo adicional en Ciudades_Estrategicas:**
+
+| ciudad | mercado | factor_retorno |
+|---|---|---|
+| Houston, TX | Caliente | 0.0 |
+| San Antonio, TX | Caliente | 0.1 |
+| Oklahoma City, OK | Medio | 0.3 |
+| Little Rock, AR | Frío | 0.5 |
+| (no está en la tabla) | — | 0.7 (default pueblo) |
+
+`factor_retorno` = qué fracción del costo del viaje de regreso se le cobra a
+esta carga. El nivel de mercado es el PROXY de la probabilidad de backhaul
+(Caliente ≈ 80%+, Medio ≈ 50%, Frío ≈ 20%, fuera de tabla ≈ 0%).
+
+**En Make (cadena de precios):**
+
+```
+[Airtable Search: Ciudades_Estrategicas WHERE ciudad ≈ delivery_city, Max 1]
+[Array Aggregator anti-rotura]
+[Set var: factor_retorno = ifempty(first(Array.factor_retorno); 0.7)]
+[Set var: costo_reposicionamiento =
+    viaje_millas_real × tarifa_por_milla_real × factor_retorno × 0.5]
+[subtotal += costo_reposicionamiento]
+```
+
+Ejemplo (283 mi, tarifa $2.50): Houston (0.0) → +$0. Pueblo (0.7) → +$248.
+Misma distancia, la diferencia es la realidad económica del regreso vacío.
+
+### FASE 4 — Probabilidad de backhaul con datos reales (FUTURO LEJANO)
+
+NO modelar probabilidades sin historial: serían números inventados.
+Cuando Bookings tenga 100+ viajes completados, calcular por ciudad:
+
+```
+prob_backhaul(ciudad) =
+    viajes donde se consiguió carga de regreso desde esa ciudad
+  / viajes que entregaron en esa ciudad
+```
+
+Y derivar el factor con datos: `factor_retorno = (1 − prob_backhaul) × ajuste`.
+Hasta entonces, los niveles Caliente/Medio/Frío ajustados a mano por el
+dueño son suficientes (así operan los dispatchers humanos).
+
+## Árbol de decisión completo (referencia de implementación)
+
+**Al COTIZAR (afecta el precio):**
+
+```
+¿delivery_city está en Ciudades_Estrategicas?
+   Caliente → factor_retorno 0.0 → precio competitivo
+   Frío/no  → factor 0.5-0.7    → el precio cubre el regreso vacío
+```
+
+**Al CONFIRMAR/ENTREGAR (decide la Parada_final):**
+
+```
+¿Le queda tiempo al operador para regresar a base?
+│
+├─ SÍ (viaje ≤ max_horas_regreso y el turno alcanza)
+│    ¿Ciudad de entrega es Caliente y su perfil permite esperar?
+│       SÍ → Parada_final = delivery_city (espera carga, max_horas_espera)
+│       NO → Parada_final = Base_Operacional (regresa)
+│
+└─ NO (HOS/turno acabándose)
+     ¿Perfil = Pernocta_OK?
+        NO → nunca debió ganar este viaje (tipo_viabilidad ya lo filtra)
+        SÍ → ¿Entrega en/cerca de ciudad grande (< radio_min_cercania)?
+              SÍ → Parada_final = la ciudad grande (duerme donde hay mercado)
+              NO → Parada_final = delivery_city (duerme ahí, mañana decide)
+```
+
+Las citas futuras siempre quedan protegidas por `respeta_proxima_cita`.
+
+**Nota sobre los 2 campos de Bookings:** `dirección-de-entrega` (a dónde va
+la CARGA, contrato, nunca cambia) y `Parada-final` (dónde termina el CAMIÓN,
+decisión operacional). Hoy casi siempre coinciden; este árbol es lo que los
+hará diferir cuando convenga (entrega en Flint, dormir en Detroit).
+
 ## Alternativas consideradas
 
 - **Módulo de "espera de carga" explícito desde el día 1:** descartado.
@@ -131,3 +221,9 @@ que espera + regreso caben antes de la próxima cita (mismo patrón
 
 - 2026-07-13 — versión inicial. Fase 1 implementada en el escenario de
   confirmación; Fases 2-3 quedan diseñadas para cuando haya volumen.
+- 2026-07-14 — decisión: Parada_final se usa como la siguiente ubicación
+  del operador (Fase 1, simple). Se agregan al diseño futuro: Fase 2b
+  (precio por mercado destino con factor_retorno), Fase 4 (probabilidad
+  de backhaul con datos reales) y el árbol de decisión completo.
+  Corrección importante: la ubicación se actualiza al DELIVERED (Automation),
+  no al reservar — reservar solo escribe en la agenda (Bookings).
