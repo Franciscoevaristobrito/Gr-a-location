@@ -1,0 +1,14 @@
+{
+  "tipo_camion": "box_truck",
+  "tipo_carga": "refrigerated_small",
+  "cantidad_pallets": 6,
+  "peso_total_libras": 3200,
+  "refrigerado": true,
+  "hazmat": true,
+  "servicios_especiales": "white_glove,inside_delivery",
+  "tipo_recogida": "live_load",
+  "metodo_carga": "liftgate",
+  "requiere_liftgate": true,
+  "hazmat_clase": "9",
+  "temperatura_requerida_f": 38
+}

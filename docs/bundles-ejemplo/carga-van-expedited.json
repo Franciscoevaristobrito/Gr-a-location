@@ -1,0 +1,14 @@
+{
+  "tipo_camion": "van",
+  "tipo_carga": "boxes",
+  "cantidad_pallets": 0,
+  "peso_total_libras": 800,
+  "refrigerado": false,
+  "hazmat": false,
+  "servicios_especiales": "signature_required",
+  "tipo_recogida": "live_load",
+  "metodo_carga": "manual",
+  "requiere_liftgate": false,
+  "hazmat_clase": "",
+  "temperatura_requerida_f": 0
+}

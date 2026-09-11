@@ -1,0 +1,14 @@
+{
+  "tipo_camion": "box_truck",
+  "tipo_carga": "palletized",
+  "cantidad_pallets": 8,
+  "peso_total_libras": 4500,
+  "refrigerado": false,
+  "hazmat": false,
+  "servicios_especiales": "",
+  "tipo_recogida": "live_load",
+  "metodo_carga": "forklift_dock",
+  "requiere_liftgate": false,
+  "hazmat_clase": "",
+  "temperatura_requerida_f": 0
+}
