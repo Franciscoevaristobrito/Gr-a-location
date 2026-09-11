@@ -296,6 +296,74 @@ todo vive en Airtable → el dueño lo controla desde interfaces → el chofer r
 
 ---
 
+## 11. ❌ Cancelación de citas — `cancel_load` / `confirm_cancellation`
+
+**Cómo está construido:**
+- Squad de Vapi: el triaje detecta "quiero cancelar" → handoff al asistente de cambios.
+- Tool `cancel_load`: identifica la carga (por ID-travel / broker) y **cotiza el TONU**
+  (Truck Ordered Not Used) — la penalización por cancelar, según la tabla `Config`
+  y qué tan cerca está de la hora de recogida.
+- Tool `confirm_cancellation`: el broker ACEPTA el TONU → la cita pasa a `Cancelada`
+  → se **libera** el operador/camión (vuelve a estar disponible).
+- El monto del TONU es configurable en `Config` (el dueño lo ajusta sin tocar Make).
+
+**Tu tarea de análisis (qué entender antes de probar):**
+- ¿Cómo identifica CUÁL carga cancelar? (número de carga / broker)
+- ¿Cómo calcula el TONU? (¿fijo? ¿sube si está cerca de la hora?) → míralo en `Config`
+- Al confirmar: ¿solo cambia el estado, o también libera el camión y avisa a alguien?
+
+**Probar:**
+- [ ] Broker llama a cancelar → la IA identifica la carga correcta
+- [ ] Cotiza el TONU correcto (según Config / cercanía a la hora)
+- [ ] Confirmar → la cita queda `Cancelada`
+- [ ] El operador/camión se LIBERA (ya disponible para otra carga)
+- [ ] El detector de conflictos ya NO cuenta esa cita (canceladas no chocan)
+- [ ] (si aplica) se registra el cargo del TONU para cobrarlo
+
+**Estado:** [ ] Revisado
+**Notas:**
+```
+(severidad · qué pasó)
+
+```
+
+---
+
+## 12. 🔄 Reprogramación de citas — `reschedule_load` / `confirm_reschedule`
+
+**Cómo está construido:**
+- Squad de Vapi: triaje detecta "quiero cambiar la hora/fecha" → handoff a cambios.
+- Tool `reschedule_load`: identifica la carga y **cotiza Detention/Layover** si aplica.
+- **Escalera de reasignación de 3 niveles** (intenta en orden):
+  1. **Mismo camión** a la nueva hora (si le cabe en su turno/HOS)
+  2. **Otro camión** (si el primero no puede)
+  3. **Hora alternativa** (si ningún camión cabe a la hora pedida)
+- Tool `confirm_reschedule`: aplica el cambio (nueva hora y/o camión) + los fees.
+- Detention/Layover configurables en `Config`.
+
+**Tu tarea de análisis (qué entender antes de probar):**
+- La **escalera de 3 niveles**: ¿en qué orden intenta y cuándo salta al siguiente?
+- ¿Cómo calcula Detention (espera) vs Layover (pernocta)? → míralo en `Config`
+- Si reasigna a OTRO camión: ¿el camión viejo se LIBERA? ¿el turno se reajusta?
+
+**Probar:**
+- [ ] Broker pide cambiar la hora → la IA identifica la carga
+- [ ] Nivel 1: intenta el MISMO camión a la nueva hora (si cabe)
+- [ ] Nivel 2: si no cabe → ofrece OTRO camión
+- [ ] Nivel 3: si ninguno → ofrece una HORA ALTERNATIVA
+- [ ] Cotiza Detention/Layover cuando aplica
+- [ ] Confirmar → la cita se actualiza (hora/camión) sin romper HOS ni turnos
+- [ ] El camión viejo se libera si hubo cambio de camión
+- [ ] El detector de conflictos no marca falso choque tras el cambio
+
+**Estado:** [ ] Revisado
+**Notas:**
+```
+
+```
+
+---
+
 ## 📋 Tracker consolidado (llénalo al final)
 
 Después de revisar todo, junta aquí lo anotado, ordenado por severidad:
@@ -339,5 +407,8 @@ feedback real y dinero entrando.
 ---
 
 ## Cambios
+- 2026-09-11 — agregadas 2 tareas de análisis: cancelación (cancel_load /
+  confirm_cancellation, TONU) y reprogramación (reschedule_load /
+  confirm_reschedule, escalera de 3 niveles, Detention/Layover).
 - 2026-09-05 — versión inicial. Visión del sistema + guía de revisión pre-demo
   por componente, sistema de severidad, tracker consolidado y definición de "listo".
